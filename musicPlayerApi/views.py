@@ -19,3 +19,4 @@ def MusicList(request):
         Musics = Music.objects.all()
         serializer = MusicSerializer(Musics, many=True)
         return Response(serializer.data)
+
