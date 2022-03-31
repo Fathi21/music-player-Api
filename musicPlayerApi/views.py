@@ -17,5 +17,5 @@ def MusicList(request):
 
     if request.method == 'GET':
         Musics = Music.objects.all()
-        serializer = MusicSerializer(({"Name" : "Fathi"}), many=True)
+        serializer = MusicSerializer(Musics, many=True)
         return Response(serializer.data)

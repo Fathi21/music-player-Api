@@ -12,11 +12,9 @@ class Music(models.Model):
     PhotoCover = models.ImageField(upload_to ='uploads/')
     CreatedAt = models.DateField(default=timezone.now)
 
-
     def __str__(self):
         return str(self.Title) if self.Title else ''
     
-
     class Meta:
         verbose_name_plural = "Music"
 
@@ -28,11 +26,9 @@ class Category(models.Model):
     Description = models.TextField(blank=False, null=False)
     CreatedAt = models.DateField(default=timezone.now)
 
-
     def __str__(self):
         return str(self.Title) if self.Title else ''
     
-
     class Meta:
         verbose_name_plural = "Category"
 
@@ -42,11 +38,9 @@ class Favourite(models.Model):
     MusicId = models.ForeignKey(Music, on_delete=models.CASCADE)
     CreatedAt = models.DateField(default=timezone.now)
 
-
     def __str__(self):
         return str(self.MusicId) if self.MusicId else ''
     
-
     class Meta:
         verbose_name_plural = "Favourite"
 
@@ -56,10 +50,8 @@ class Liked(models.Model):
     MusicId = models.ForeignKey(Music, on_delete=models.CASCADE)
     CreatedAt = models.DateField(default=timezone.now)
 
-
     def __str__(self):
         return str(self.MusicId) if self.MusicId else ''
     
-
     class Meta:
         verbose_name_plural = "Liked"
