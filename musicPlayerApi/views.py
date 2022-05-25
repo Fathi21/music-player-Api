@@ -11,7 +11,7 @@ def Api(request):
 
     return JsonResponse({"Name" : "Fathi"})
 
-
+# GET request for music list 
 @api_view(['GET'])
 def MusicList(request):
 
@@ -25,12 +25,12 @@ def MusicList(request):
         serializer = MusicSerializer(Musics, many=True)
         return Response(serializer.data)
 
-
+# GET request one song 
 @api_view(['GET'])
 def SongSelected(request, pk):
 
     try:
-        Musics = Music.objects.filter(id=pk)
+        Musics = Music.objects.get(id=pk)
     except Musics.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
