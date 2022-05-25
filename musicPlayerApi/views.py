@@ -30,7 +30,7 @@ def MusicList(request):
 def SongSelected(request, pk):
 
     try:
-        Musics = Music.objects.get(id=pk)
+        Musics = Music.objects.filter(id=pk)
     except Musics.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
