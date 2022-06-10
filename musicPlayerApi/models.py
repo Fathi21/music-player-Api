@@ -55,3 +55,17 @@ class Liked(models.Model):
     
     class Meta:
         verbose_name_plural = "Liked"
+
+
+class Album(models.Model):
+    AlbumName = models.TextField(blank=False, null=False)
+    UserId = models.ForeignKey(User, on_delete=models.CASCADE)
+    MusicId = models.ForeignKey(Music, on_delete=models.CASCADE)
+    CreatedAt = models.DateField(default=timezone.now)
+
+
+    def __str__(self):
+        return str(self.MusicId) if self.MusicId else ''
+    
+    class Meta:
+        verbose_name_plural = "Album"
