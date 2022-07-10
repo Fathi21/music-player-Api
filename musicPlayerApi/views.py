@@ -13,7 +13,7 @@ def Api(request):
 
 # GET request for music list 
 @api_view(['GET'])
-def MusicList(request):
+def GetAllMusic(request):
 
     try:
         Musics = Music.objects.all()
@@ -25,9 +25,11 @@ def MusicList(request):
         serializer = MusicSerializer(Musics, many=True)
         return Response(serializer.data)
 
+
 # GET request one song 
+# songSelected
 @api_view(['GET'])
-def SongSelected(request, pk):
+def GetSongById(request, pk):
 
     try:
         Musics = Music.objects.filter(id=pk)
