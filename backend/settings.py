@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'django.contrib.staticfiles',  # required for serving swagger ui's css/js files
     'drf_yasg',
+    'rest_framework_swagger'
 ]
 
 MIDDLEWARE = [
@@ -145,7 +146,9 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+
 
 
 }
