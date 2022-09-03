@@ -3,7 +3,8 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Create your models here.
-
+from colorfield.fields import ColorField
+from django.db import models
 
 class Category(models.Model):
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -23,6 +24,7 @@ class Music(models.Model):
     Title = models.TextField(blank=False, null=False)
     MusicFile = models.FileField(upload_to ='uploads/MusicFile')
     PhotoCover = models.ImageField(upload_to ='uploads/PhotoCover')
+    color = ColorField(default='#76b96a')
     CategoryId = models.ForeignKey(Category, on_delete=models.CASCADE)
     CreatedAt = models.DateField(default=timezone.now)
 
@@ -69,3 +71,10 @@ class Album(models.Model):
     
     class Meta:
         verbose_name_plural = "Album"
+
+class Comment(models.Model):
+    UserId = models.ForeignKey(User, on_delete=models.CASCADE)
+    SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
+    body = models.TextField(blank=False, null=False)
+    CreatedAt = models.DateField(default=timezone.now)
+

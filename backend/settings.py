@@ -47,7 +47,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'musicPlayerApi',
     'rest_framework',
-    "corsheaders",
+    'corsheaders',
+    'colorfield'
 ]
 
 MIDDLEWARE = [
