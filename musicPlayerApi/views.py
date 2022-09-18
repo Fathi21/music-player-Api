@@ -11,7 +11,7 @@ def Api(request):
 
     return JsonResponse({"Name" : "Fathi"})
 
-# GET request for music list 
+# GET request for all songs list 
 @api_view(['GET'])
 def GetAllMusic(request):
 
@@ -26,8 +26,7 @@ def GetAllMusic(request):
         return Response(serializer.data)
 
 
-# GET request one song 
-# songSelected
+# GET request by song id 
 @api_view(['GET'])
 def GetSongById(request, pk):
 
@@ -39,3 +38,31 @@ def GetSongById(request, pk):
     if request.method == 'GET':
         serializer = MusicSerializer(Musics, many=True)
         return Response(serializer.data)
+
+
+#Post request, Like a song by id
+@api_view(['POST'])
+def LikeASongById(request, pk):
+
+    if request.method == 'POST':
+        serializer = LikeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+#Get request for likes by song id 
+@api_view(['GET'])
+def GetLikesBySongId(request, pk):
+
+    try:
+        Likes = Liked.objects.filter(id=pk)
+    except Likes.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = LikeSerializer(Likes, many=True)
+        return Response(serializer.data)
+
+
