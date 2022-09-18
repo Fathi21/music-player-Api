@@ -35,21 +35,9 @@ class Music(models.Model):
         verbose_name_plural = "Music"
 
 
-class Favourite(models.Model):
-    UserId = models.ForeignKey(User, on_delete=models.CASCADE)
-    MusicId = models.ForeignKey(Music, on_delete=models.CASCADE)
-    CreatedAt = models.DateField(default=timezone.now)
-
-    def __str__(self):
-        return str(self.MusicId) if self.MusicId else ''
-    
-    class Meta:
-        verbose_name_plural = "Favourite"
-
-
 class Liked(models.Model):
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
-    MusicId = models.ForeignKey(Music, on_delete=models.CASCADE)
+    SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
     CreatedAt = models.DateField(default=timezone.now)
 
     def __str__(self):
@@ -59,10 +47,10 @@ class Liked(models.Model):
         verbose_name_plural = "Liked"
 
 
-class Album(models.Model):
-    AlbumName = models.TextField(blank=False, null=False)
+class PlayList(models.Model):
+    PlayListName = models.TextField(blank=False, null=False)
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
-    MusicId = models.ForeignKey(Music, on_delete=models.CASCADE)
+    SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
     CreatedAt = models.DateField(default=timezone.now)
 
 
@@ -70,11 +58,18 @@ class Album(models.Model):
         return str(self.MusicId) if self.MusicId else ''
     
     class Meta:
-        verbose_name_plural = "Album"
+        verbose_name_plural = "PlayList"
+
 
 class Comment(models.Model):
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
     SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
     body = models.TextField(blank=False, null=False)
     CreatedAt = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return str(self.UserId) if self.UserId else ''
+    
+    class Meta:
+        verbose_name_plural = "Comment"
 

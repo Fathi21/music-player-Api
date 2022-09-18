@@ -5,6 +5,6 @@ from .models import *
 
 admin.site.register(Music)
 admin.site.register(Category)
-admin.site.register(Favourite)
+admin.site.register(Comment)
 admin.site.register(Liked)
-admin.site.register(Album)
+admin.site.register(PlayList)
