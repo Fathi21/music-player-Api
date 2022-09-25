@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from .models import *
 from .serializers import *
 
@@ -63,6 +64,58 @@ def GetLikesBySongId(request, pk):
 
     if request.method == 'GET':
         serializer = LikeSerializer(Likes, many=True)
+        return Response(serializer.data)
+
+
+#https://docs.amplication.com/docs/tutorials/react-todos/step-004/
+
+
+@api_view(['POST'])
+def Register(request):
+
+    serialized = UserSerializer(data=request.data)
+    if serialized.is_valid():
+        serialized.save()
+
+        return Response(serialized.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+def login(request):
+
+    serialized = UserSerializer(data=request.data)
+    if serialized.is_valid():
+        #serialized.save()
+
+        return Response(serialized.data, status=status.HTTP_200)
+    else:
+        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+@api_view(['GET'])
+def UserById(request, pk):
+    try:
+        Users = User.objects.filter(id=pk)
+    except Users.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(Users, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def TokanForUser(request):
+    try:
+        for user in User.objects.all():
+            tokenUsers = Token.objects.get_or_create(user=user)
+    except tokenUsers.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(tokenUsers, many=True)
         return Response(serializer.data)
 
 
