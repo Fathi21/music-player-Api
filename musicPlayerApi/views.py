@@ -4,6 +4,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.hashers import make_password
 from .models import *
 from .serializers import *
 
@@ -75,8 +76,19 @@ def Register(request):
 
     serialized = UserSerializer(data=request.data)
     if serialized.is_valid():
-        serialized.save()
 
+        username = serialized.validated_data['email']
+        email = serialized.validated_data['username']
+        password = serialized.validated_data['password']
+
+        newUser = User(
+            username=username,
+            email=email,
+            password = make_password(password)
+        )
+
+        newUser.save()
+ 
         return Response(serialized.data, status=status.HTTP_201_CREATED)
     else:
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
