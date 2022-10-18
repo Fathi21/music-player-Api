@@ -7,7 +7,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import make_password
 from .models import *
 from .serializers import *
-
+from django.contrib.auth.models import User
 
 def Api(request):
 
@@ -77,19 +77,25 @@ def Register(request):
     serialized = UserSerializer(data=request.data)
     if serialized.is_valid():
 
-        username = serialized.validated_data['email']
-        email = serialized.validated_data['username']
-        password = serialized.validated_data['password']
+        if request.method == 'POST':
+            email = serialized.validated_data['email']
+            username = serialized.validated_data['username']
+            password = serialized.validated_data['password']
 
-        newUser = User(
-            username=username,
-            email=email,
-            password = make_password(password)
-        )
+            newUser = User(
+                username=username,
+                email=email,
+                password = make_password(password)
+            )
 
-        newUser.save()
- 
-        return Response(serialized.data, status=status.HTTP_201_CREATED)
+            userExist = User.objects.filter(email=email)
+            if not userExist:
+                newUser.save()
+                return Response(serialized.data, status=status.HTTP_201_CREATED)
+            
+            else:
+                return Response(serialized.data, status=status.HTTP_406_NOT_ACCEPTABLE)
+
     else:
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
 
