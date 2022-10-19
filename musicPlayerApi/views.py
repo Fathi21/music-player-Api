@@ -124,6 +124,29 @@ def UserById(request, pk):
         serializer = UserSerializer(Users, many=True)
         return Response(serializer.data)
 
+
+@api_view(['GET'])
+def UserByUserName(request, username):
+    try:
+        Users = User.objects.filter(username=username)
+    except Users.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(Users, many=True)
+        return Response(serializer.data)
+
+@api_view(['GET'])
+def UserByEmail(request, email):
+    try:
+        Users = User.objects.filter(email=email)
+    except Users.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(Users, many=True)
+        return Response(serializer.data)
+
 @api_view(['GET'])
 def TokanForUser(request):
     try:

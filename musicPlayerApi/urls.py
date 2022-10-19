@@ -11,6 +11,8 @@ urlpatterns = [
     path('Api/GetLikesBySongId/<int:pk>', views.GetLikesBySongId, name='GetLikesBySongId'),
     path('Api/LikeASongById/<int:pk>', views.LikeASongById, name='LikeASongById'),
     path('Api/UserById/<int:pk>', views.UserById, name='UserById'),
+    path('Api/UserByUserName/<str:username>', views.UserByUserName, name='UserByUserName'),
+    path('Api/UserByEmail/<str:email>', views.UserByEmail, name='UserByEmail'),
     path('Api/Register', views.Register, name='Register'),
     path('Api/TokanForUser', views.TokanForUser, name='TokanForUser'),
 ]
