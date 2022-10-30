@@ -137,15 +137,17 @@ def UserByUserName(request, username):
         return Response(serializer.data)
 
 @api_view(['GET'])
-def UserByEmail(request, email):
+def ExistUsers(request):
     try:
-        Users = User.objects.filter(email=email)
+        Users = User.objects.all()
     except Users.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
         serializer = UserSerializer(Users, many=True)
         return Response(serializer.data)
+
+
 
 @api_view(['GET'])
 def TokanForUser(request):

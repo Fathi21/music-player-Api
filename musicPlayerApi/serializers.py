@@ -21,9 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'email',
             'username',
-            'password',
-            'first_name',
-            'last_name',
         )
 
 class TokenSerializer(serializers.ModelSerializer):
