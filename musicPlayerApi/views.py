@@ -112,7 +112,6 @@ def login(request):
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
 @api_view(['GET'])
 def UserById(request, pk):
     try:
