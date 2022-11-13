@@ -25,5 +25,5 @@ class UserSerializer(serializers.ModelSerializer):
 
 class TokenSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = Token
         fields ='__all__' 

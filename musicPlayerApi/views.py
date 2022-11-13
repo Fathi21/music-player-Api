@@ -105,7 +105,6 @@ def login(request):
 
     serialized = UserSerializer(data=request.data)
     if serialized.is_valid():
-        #serialized.save()
 
         return Response(serialized.data, status=status.HTTP_200)
     else:
@@ -139,6 +138,7 @@ def UserByUserName(request, username):
 def ExistUsers(request):
     try:
         Users = User.objects.all()
+        
     except Users.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -151,13 +151,9 @@ def ExistUsers(request):
 @api_view(['GET'])
 def TokanForUser(request):
     try:
-        for user in User.objects.all():
-            tokenUsers = Token.objects.get_or_create(user=user)
-    except tokenUsers.DoesNotExist:
+        Token.objects.get_or_create(user=1)
+    except Token.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = UserSerializer(tokenUsers, many=True)
-        return Response(serializer.data)
 
-
+    return JsonResponse({"Name" : "Fathi"})

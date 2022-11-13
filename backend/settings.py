@@ -48,7 +48,9 @@ INSTALLED_APPS = [
     'musicPlayerApi',
     'rest_framework',
     'corsheaders',
-    'colorfield'
+    'colorfield',
+    'rest_framework.authtoken'
+
 ]
 
 MIDDLEWARE = [
