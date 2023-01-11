@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'colorfield',
     'rest_framework.authtoken'
+    
 
 ]
 

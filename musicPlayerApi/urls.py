@@ -1,6 +1,5 @@
 from django.urls import path
 
-
 from . import views
 
 
@@ -15,4 +14,5 @@ urlpatterns = [
     path('Api/ExistUsers', views.ExistUsers, name='ExistUsers'),
     path('Api/Register', views.Register, name='Register'),
     path('Api/TokanForUser', views.TokanForUser, name='TokanForUser'),
+
 ]
