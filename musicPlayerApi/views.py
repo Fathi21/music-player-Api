@@ -135,8 +135,10 @@ def login(request, username, password):
                     }
                     return Response(content)
             else:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-            
+                content = {
+                        'Username or password is incorrect'
+                }
+                return Response(content)            
     except user.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
