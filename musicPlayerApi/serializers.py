@@ -21,9 +21,14 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             'email',
             'username',
+            'password'
         )
 
-class TokenSerializer(serializers.ModelSerializer):
+class ExistUsersSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Token
-        fields ='__all__' 
+        model = User
+        fields = (
+            'email',
+            'username',
+            'password'
+        )

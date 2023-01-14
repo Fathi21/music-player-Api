@@ -13,6 +13,5 @@ urlpatterns = [
     path('Api/UserByUserName/<str:username>', views.UserByUserName, name='UserByUserName'),
     path('Api/ExistUsers', views.ExistUsers, name='ExistUsers'),
     path('Api/Register', views.Register, name='Register'),
-    path('Api/TokanForUser', views.TokanForUser, name='TokanForUser'),
-
+    path('Api/login/<str:username>/<str:password>', views.login, name='login'),
 ]

@@ -8,6 +8,8 @@ from django.contrib.auth.hashers import make_password
 from .models import *
 from .serializers import *
 from django.contrib.auth.models import User
+from django.db.models import Q
+from django.contrib.auth.hashers import check_password
 
 def Api(request):
 
@@ -90,7 +92,11 @@ def Register(request):
 
             userExist = User.objects.filter(email=email)
             if not userExist:
+                print(newUser)
                 newUser.save()
+
+                token = Token.objects.create(user = newUser)
+
                 return Response(serialized.data, status=status.HTTP_201_CREATED)
             
             else:
@@ -100,15 +106,33 @@ def Register(request):
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['POST'])
-def login(request):
+@api_view(['GET'])
+def login(request, username, password):
+    try:
+        user = User.objects.filter(username=username)
+        
+        if request.method == 'GET':
+            for userDataRequested in user:
+                userPassword = userDataRequested.password
+                userToken = Token.objects.get_or_create(user=userDataRequested)
 
-    serialized = UserSerializer(data=request.data)
-    if serialized.is_valid():
+            checkPassword = check_password(password, userPassword)
 
-        return Response(serialized.data, status=status.HTTP_200)
-    else:
-        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+            print(userToken[0])
+            if (checkPassword and userToken):
+
+                content = {
+                    'Token': str(userToken[0]),
+                }
+                return Response(content)
+            else:
+                content = {
+                    'Username or password is incorrect'
+                }
+                return Response(content)
+    except user.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
 
 
 @api_view(['GET'])
@@ -143,17 +167,6 @@ def ExistUsers(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = UserSerializer(Users, many=True)
+        serializer = ExistUsersSerializer(Users, many=True)
         return Response(serializer.data)
 
-
-
-@api_view(['GET'])
-def TokanForUser(request):
-    try:
-        Token.objects.get_or_create(user=1)
-    except Token.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-
-    return JsonResponse({"Name" : "Fathi"})
