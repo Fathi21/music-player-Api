@@ -10,6 +10,7 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
+from django.core.exceptions import ObjectDoesNotExist
 
 def Api(request):
 
@@ -110,29 +111,34 @@ def Register(request):
 def login(request, username, password):
     try:
         user = User.objects.filter(username=username)
-        
+
         if request.method == 'GET':
-            for userDataRequested in user:
-                userPassword = userDataRequested.password
-                userToken = Token.objects.get_or_create(user=userDataRequested)
+            if user:
+                for dataRequested in user:
+                    userPassword = dataRequested.password
+                    userToken = Token.objects.get_or_create(user=dataRequested)
 
-            checkPassword = check_password(password, userPassword)
+                checkPassword = check_password(password, userPassword)
 
-            print(userToken[0])
-            if (checkPassword and userToken):
+                print(userToken[0])
+                if (checkPassword and userToken):
 
-                content = {
-                    'Token': str(userToken[0]),
-                }
-                return Response(content)
+                    content = {
+                        'Username': str(dataRequested.username),
+                        'Email': str(dataRequested.email),
+                        'Token': str(userToken[0]),
+                    }
+                    return Response(content)
+                else:
+                    content = {
+                        'Username or password is incorrect'
+                    }
+                    return Response(content)
             else:
-                content = {
-                    'Username or password is incorrect'
-                }
-                return Response(content)
+                return Response(status=status.HTTP_404_NOT_FOUND)
+            
     except user.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
 
 
 @api_view(['GET'])
