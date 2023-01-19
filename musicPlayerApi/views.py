@@ -10,7 +10,6 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
-from django.core.exceptions import ObjectDoesNotExist
 
 def Api(request):
 
@@ -127,16 +126,20 @@ def login(request, username, password):
                         'Username': str(dataRequested.username),
                         'Email': str(dataRequested.email),
                         'Token': str(userToken[0]),
+                        'isUserHasToken': True
+
                     }
                     return Response(content)
                 else:
                     content = {
-                        'Username or password is incorrect'
+                        'message' : 'Username or password is incorrect',
+                        'isUserHasToken': False
                     }
                     return Response(content)
             else:
                 content = {
-                        'Username or password is incorrect'
+                    'message' : 'Username or password is incorrect',
+                    'isUserHasToken': False                
                 }
                 return Response(content)            
     except user.DoesNotExist:
