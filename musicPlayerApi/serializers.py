@@ -30,5 +30,4 @@ class ExistUsersSerializer(serializers.ModelSerializer):
         fields = (
             'email',
             'username',
-            'password'
         )
