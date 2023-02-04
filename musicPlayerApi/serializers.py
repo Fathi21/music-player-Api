@@ -31,3 +31,15 @@ class ExistUsersSerializer(serializers.ModelSerializer):
             'email',
             'username',
         )
+
+
+class PlayListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PlayList
+        fields ='__all__' 
+
+
+class SongsAddedToPlayListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SongsAddedToPlayList
+        fields ='__all__' 

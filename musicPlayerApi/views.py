@@ -48,7 +48,6 @@ def GetSongById(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-
 #Post request, Like a song by id
 @api_view(['POST'])
 def LikeASongById(request):
@@ -71,7 +70,8 @@ def LikeASongById(request):
             else:
                 like.delete()
                 return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
-        
+
+
 #Get request for likes by song id 
 @api_view(['GET'])
 def GetLikesBySongId(request, pk):
@@ -85,7 +85,6 @@ def GetLikesBySongId(request, pk):
 
     except Likes.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-
 
 
 @api_view(['GET'])
@@ -208,5 +207,64 @@ def ExistUsers(request):
     if request.method == 'GET':
         serializer = ExistUsersSerializer(Users, many=True)
         return Response(serializer.data)
+
+
+@api_view(['GET'])
+def GetPlayList(request):
+    
+    allPlayList = PlayList.objects.all()
+
+    if request.method == 'GET':
+        serializer = PlayListSerializer(allPlayList, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['GET'])
+def GetSongsAddedToPlayList(request):
+    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.all()
+
+    if request.method == 'GET':
+        serializer = SongsAddedToPlayListSerializer(AllSongsAddedToPlayList, many=True)
+        return Response(serializer.data)
+
+
+@api_view(['POST'])
+def CreateNewPlayListAddSong(request):
+
+    serialized = SongsAddedToPlayListSerializer(data=request.data)
+    if serialized.is_valid():
+
+        if request.method == 'POST':
+            breakpoint()
+            song = serialized.validated_data['SongID']
+            user = serialized.validated_data['UserId']
+
+            songId = Music.objects.get(Title=song)
+            userId = User.objects.filter(username=user)
+
+            if songId and userId:
+
+                AddSongToNewPlayList = SongsAddedToPlayList(
+                    song=song,
+                    user=user,
+                )
+
+                # newPlayList = PlayList(
+                #     song=song,
+                #     user=user,
+                # )
+
+                # AddSongToNewPlayList.save()
+
+                print (AddSongToNewPlayList)
+
+                return Response(serialized.data)
+
+
+
+
+    else:
+        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 

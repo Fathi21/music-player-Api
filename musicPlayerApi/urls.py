@@ -15,4 +15,8 @@ urlpatterns = [
     path('Api/ExistUsers', views.ExistUsers, name='ExistUsers'),
     path('Api/Register', views.Register, name='Register'),
     path('Api/login/<str:username>/<str:password>', views.login, name='login'),
+    path('Api/GetPlayList', views.GetPlayList, name='GetPlayList'),
+    path('Api/GetSongsAddedToPlayList', views.GetSongsAddedToPlayList, name='GetSongsAddedToPlayList'),
+    path('Api/CreateNewPlayListAddSong', views.CreateNewPlayListAddSong, name='CreateNewPlayListAddSong'),
+
 ]
