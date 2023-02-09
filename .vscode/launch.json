@@ -5,13 +5,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Python: Django",
+      "name": "Python: Current File",
       "type": "python",
       "request": "launch",
-      "pythonPath": "/Users/xyz/Documents/dev/my_project/my_project_env/bin/python",
       "program": "${workspaceFolder}/manage.py",
-      "args": ["runserver"],
-      "django": true,
+      "console": "integratedTerminal",
       "justMyCode": true
     }
   ]
