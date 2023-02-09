@@ -228,40 +228,33 @@ def GetSongsAddedToPlayList(request):
         return Response(serializer.data)
 
 
-@api_view(['POST'])
-def CreateNewPlayListAddSong(request):
 
-    serialized = SongsAddedToPlayListSerializer(data=request.data)
+@api_view(['POST'])
+def CreateNewPlayList(request):
+
+    serialized = PlayListSerializer(data=request.data)
     if serialized.is_valid():
 
         if request.method == 'POST':
-            breakpoint()
-            song = serialized.validated_data['SongID']
-            user = serialized.validated_data['UserId']
+            
+            playListName = serialized.validated_data['PlayListName']
+            description = serialized.validated_data['Description']
+            userId = serialized.validated_data['UserId']
 
-            songId = Music.objects.get(Title=song)
-            userId = User.objects.filter(username=user)
+            userId = User.objects.filter(id=userId.id)
+            
 
-            if songId and userId:
+            if userId: 
 
-                AddSongToNewPlayList = SongsAddedToPlayList(
-                    song=song,
-                    user=user,
+                createNewPlayList = PlayList(
+                    PlayListName = playListName,
+                    Description = description,
+                    UserId=userId,
                 )
 
-                # newPlayList = PlayList(
-                #     song=song,
-                #     user=user,
-                # )
-
-                # AddSongToNewPlayList.save()
-
-                print (AddSongToNewPlayList)
+                createNewPlayList.save()
 
                 return Response(serialized.data)
-
-
-
 
     else:
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)

@@ -50,7 +50,7 @@ class Liked(models.Model):
 class PlayList(models.Model):
     PlayListName = models.TextField(blank=True, null=True)
     Description = models.TextField(blank=True, null=True)
-    PhotoCover = models.ImageField(upload_to ='uploads/PhotoCover', blank=True)
+    PhotoCover = models.ImageField(upload_to ='uploads/PhotoCover')
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
     CreatedAt = models.DateField(default=timezone.now)
 
