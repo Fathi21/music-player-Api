@@ -61,9 +61,7 @@ def LikeASongById(request):
             userId = serializer.validated_data['UserId']
             like = Liked.objects.filter(Q(SongID=songId) & Q(UserId=userId))
             
-            print('LIKE', like)
-
-            if (like.count() < 1):
+            if (not like):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             
