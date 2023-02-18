@@ -1,5 +1,4 @@
 from django.urls import path
-
 from . import views
 
 
@@ -18,5 +17,6 @@ urlpatterns = [
     path('Api/GetPlayList', views.GetPlayList, name='GetPlayList'),
     path('Api/GetSongsAddedToPlayList', views.GetSongsAddedToPlayList, name='GetSongsAddedToPlayList'),
     path('Api/CreateNewPlayList', views.CreateNewPlayList, name='CreateNewPlayList'),
+    path('Api/GetCategoryById/<int:pk>', views.GetCategoryById, name='GetCategoryById'),
 
 ]

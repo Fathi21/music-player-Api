@@ -119,8 +119,9 @@ def Register(request):
                 print(newUser)
                 newUser.save()
 
-                token = Token.objects.create(user = newUser)
+                Token.objects.create(user = newUser)
 
+                login(username, password)
                 return Response(serialized.data, status=status.HTTP_201_CREATED)
             
             else:
@@ -143,7 +144,6 @@ def login(request, username, password):
 
                 checkPassword = check_password(password, userPassword)
 
-                print(userToken[0])
                 if (checkPassword and userToken):
 
                     content = {
@@ -199,12 +199,14 @@ def UserByUserName(request, username):
 def ExistUsers(request):
     try:
         Users = User.objects.all()
+        
+        if request.method == 'GET':
+            serializer = ExistUsersSerializer(Users, many=True)
+            return Response(serializer.data)
+        
     except Users.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = ExistUsersSerializer(Users, many=True)
-        return Response(serializer.data)
 
 
 @api_view(['GET'])
@@ -239,10 +241,11 @@ def CreateNewPlayList(request):
             description = serialized.validated_data['Description']
             userId = serialized.validated_data['UserId']
 
-            userId = User.objects.filter(id=userId.id)
+            userId = User.objects.get(id=userId.id)
             
+            playListNameExist = PlayList.objects.filter(PlayListName = playListName)
 
-            if userId: 
+            if (userId and playListNameExist.count() == 0 ): 
 
                 createNewPlayList = PlayList(
                     PlayListName = playListName,
@@ -258,4 +261,17 @@ def CreateNewPlayList(request):
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
+@api_view(['GET'])
+def GetCategoryById(request, pk):
+    try:
+        getCategory = Category.objects.filter(id=pk)
+        
+        if request.method == 'GET':
+            serializer = CategorySerializer(getCategory, many=True)
+            return Response(serializer.data)
+        
+    except getCategory.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    
+    
+    

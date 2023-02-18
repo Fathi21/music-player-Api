@@ -10,7 +10,7 @@ class Category(models.Model):
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
     Title = models.TextField(blank=False, null=False)
     Description = models.TextField(blank=False, null=False)
-    CreatedAt = models.DateField(default=timezone.now)
+    CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return str(self.Title) if self.Title else ''
@@ -26,7 +26,7 @@ class Music(models.Model):
     MusicFile = models.FileField(upload_to ='uploads/MusicFile')
     PhotoCover = models.ImageField(upload_to ='uploads/PhotoCover')
     CategoryId = models.ForeignKey(Category, on_delete=models.CASCADE)
-    CreatedAt = models.DateField(default=timezone.now)
+    CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return str(self.Title) if self.Title else ''
@@ -38,7 +38,7 @@ class Music(models.Model):
 class Liked(models.Model):
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
     SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
-    CreatedAt = models.DateField(default=timezone.now)
+    CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return str(self.SongID) if self.SongID else ''
@@ -48,11 +48,11 @@ class Liked(models.Model):
 
 
 class PlayList(models.Model):
-    PlayListName = models.TextField(blank=True, null=True)
-    Description = models.TextField(blank=True, null=True)
-    PhotoCover = models.ImageField(upload_to ='uploads/PhotoCover')
+    PlayListName = models.TextField(blank=False, null=False)
+    Description = models.TextField(blank=False, null=False)
+    PhotoCover = models.ImageField(blank=True, null=True, upload_to ='uploads/PhotoCover')
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
-    CreatedAt = models.DateField(default=timezone.now)
+    CreatedAt = models.DateTimeField(default=timezone.now)
 
 
     def __str__(self):
@@ -66,7 +66,7 @@ class SongsAddedToPlayList(models.Model):
     PlayListId = models.ForeignKey(PlayList, on_delete=models.CASCADE)
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
     SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
-    CreatedAt = models.DateField(default=timezone.now)
+    CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return str(self.PlayListId) if self.PlayListId else ''
