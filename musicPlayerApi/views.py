@@ -97,6 +97,20 @@ def GetAllLikedSongs(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+@api_view(['GET'])
+def GetAllLikedSongsByUser(request, pk):
+    try:        
+        if request.method == 'GET':
+            
+            getlikesByUser = Liked.objects.filter(UserId = pk)
+
+            serializer = LikeSerializer(getlikesByUser, many=True)
+            return Response(serializer.data)
+
+    except getlikesByUser.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+  
+
 @api_view(['POST'])
 def Register(request):
 
@@ -218,6 +232,16 @@ def GetPlayList(request):
         serializer = PlayListSerializer(allPlayList, many=True)
         return Response(serializer.data)
 
+
+@api_view(['GET'])
+def GetPlayListById(request, pk):
+    
+    playListById = PlayList.objects.filter(id = pk)
+
+    if request.method == 'GET':
+        serializer = PlayListSerializer(playListById, many=True)
+        return Response(serializer.data)
+    
 
 @api_view(['GET'])
 def GetSongsAddedToPlayList(request):
