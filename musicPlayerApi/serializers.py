@@ -23,11 +23,12 @@ class UserSerializer(serializers.ModelSerializer):
             'username',
             'password'
         )
-
-class ExistUsersSerializer(serializers.ModelSerializer):
+        
+class UserNoneSensitiveInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
+            'id',
             'email',
             'username',
         )

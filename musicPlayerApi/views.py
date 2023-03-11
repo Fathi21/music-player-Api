@@ -11,9 +11,6 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
 
-def Api(request):
-
-    return JsonResponse({"Name" : "Fathi"})
 
 # GET request for all songs list 
 @api_view(['GET'])
@@ -186,11 +183,11 @@ def login(request, username, password):
 
 
 @api_view(['GET'])
-def UserById(request, pk):
+def GetUserById(request, pk):
     try:
         Users = User.objects.filter(id=pk)
         if request.method == 'GET':
-            serializer = UserSerializer(Users, many=True)
+            serializer = UserNoneSensitiveInformationSerializer(Users, many=True)
             return Response(serializer.data)
 
     except Users.DoesNotExist:
@@ -202,7 +199,7 @@ def UserByUserName(request, username):
     try:
         Users = User.objects.filter(username=username)
         if request.method == 'GET':
-            serializer = UserSerializer(Users, many=True)
+            serializer = UserNoneSensitiveInformationSerializer(Users, many=True)
             return Response(serializer.data)
 
     except Users.DoesNotExist:
@@ -215,7 +212,7 @@ def ExistUsers(request):
         Users = User.objects.all()
         
         if request.method == 'GET':
-            serializer = ExistUsersSerializer(Users, many=True)
+            serializer = UserNoneSensitiveInformationSerializer(Users, many=True)
             return Response(serializer.data)
         
     except Users.DoesNotExist:
@@ -244,8 +241,8 @@ def GetPlayListById(request, pk):
     
 
 @api_view(['GET'])
-def GetSongsAddedToPlayList(request):
-    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.all()
+def GetSongsAddedToPlayListById(request, pk):
+    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId = pk)
 
     if request.method == 'GET':
         serializer = SongsAddedToPlayListSerializer(AllSongsAddedToPlayList, many=True)
