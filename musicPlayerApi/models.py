@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 # Create your models here.
-from colorfield.fields import ColorField
 from django.db import models
 
 class Category(models.Model):
