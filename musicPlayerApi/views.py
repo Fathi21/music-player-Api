@@ -10,6 +10,7 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
+import random
 
 
 # GET request for all songs list 
@@ -243,9 +244,11 @@ def GetPlayListById(request, pk):
 @api_view(['GET'])
 def GetSongsAddedToPlayListById(request, pk):
     AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId = pk)
+    
+    songsFromPlayList = Music.objects.filter(id__in = AllSongsAddedToPlayList)
 
     if request.method == 'GET':
-        serializer = SongsAddedToPlayListSerializer(AllSongsAddedToPlayList, many=True)
+        serializer = MusicSerializer(songsFromPlayList, many=True)
         return Response(serializer.data)
 
 
@@ -282,9 +285,27 @@ def CreateNewPlayList(request):
         return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @api_view(['GET'])
-# def 
+@api_view(['GET'])
+def GetSongfromPlaylist(request, pk):
+    try:
+        # Get all songs added to the playlist
+        AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId=pk)
+        
+        # Get a random song from the playlist
+        random_song = AllSongsAddedToPlayList.order_by('?').first()
+        # Musics = Music.objects.filter(id == random_song.SongID)
 
+        # Serialize and return the random song
+        if request.method == 'GET':
+            
+            if random_song is None:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+
+            serializer = SongsAddedToPlayListSerializer(random_song)
+            return Response(serializer.data)
+
+    except AllSongsAddedToPlayList.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
 @api_view(['GET'])
 def GetCategoryById(request, pk):
