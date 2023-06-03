@@ -1,8 +1,11 @@
+print("Running test file...")
+
 from rest_framework.test import APITestCase
 from rest_framework import status
 from .models import PlayList
 from .serializers import PlayListSerializer
 from django.contrib.auth.models import User
+
 
 class GetPlayListTestCase(APITestCase):
     def setUp(self):

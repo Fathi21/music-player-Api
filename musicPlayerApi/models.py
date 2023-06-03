@@ -40,7 +40,7 @@ class Liked(models.Model):
     CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return str(self.SongID) if self.SongID else ''
+        return f'{self.UserId} > {self.SongID}' if self.UserId and self.SongID else ''
     
     class Meta:
         verbose_name_plural = "Liked"
@@ -68,9 +68,9 @@ class SongsAddedToPlayList(models.Model):
     CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return str(self.PlayListId) if self.PlayListId else ''
+        return f'{self.PlayListId} > {self.SongID}' if self.PlayListId and self.SongID else ''
     
     class Meta:
-        verbose_name_plural = "AddToPlayList"
+        verbose_name_plural = "songs in playlist"
 
 

@@ -10,7 +10,7 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
-import random
+from django.contrib.auth import authenticate
 
 
 # GET request for all songs list 
@@ -147,6 +147,7 @@ def Register(request):
 def login(request, username, password):
     try:
         user = User.objects.filter(username=username)
+        # user = authenticate(username=username, password=password)
 
         if request.method == 'GET':
             if user:
