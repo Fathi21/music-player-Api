@@ -244,9 +244,11 @@ def GetPlayListById(request, pk):
 
 @api_view(['GET'])
 def GetSongsAddedToPlayListById(request, pk):
-    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId = pk)
-    
-    songsFromPlayList = Music.objects.filter(id__in = AllSongsAddedToPlayList)
+    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId=pk)
+
+    song_ids = AllSongsAddedToPlayList.values_list('SongID', flat=True)
+
+    songsFromPlayList = Music.objects.filter(id__in=song_ids)
 
     if request.method == 'GET':
         serializer = MusicSerializer(songsFromPlayList, many=True)
