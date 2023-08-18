@@ -11,9 +11,14 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate
+from django.contrib.auth import login
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import authentication_classes, permission_classes
+
+# GET request for all songs list
 
 
-# GET request for all songs list 
 @api_view(['GET'])
 def GetAllMusic(request):
 
@@ -32,7 +37,7 @@ def GetAllMusic(request):
         return Response(serializer.data)
 
 
-# GET request by song id 
+# GET request by song id
 @api_view(['GET'])
 def GetSongById(request, pk):
 
@@ -46,35 +51,36 @@ def GetSongById(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-#Post request, Like a song by id
+# Post request, Like a song by id
 @api_view(['POST'])
 def LikeASongById(request):
-        
     if request.method == 'POST':
-        
         serializer = LikeSerializer(data=request.data)
 
         if serializer.is_valid():
             songId = serializer.validated_data['SongID']
             userId = serializer.validated_data['UserId']
-            like = Liked.objects.filter(Q(SongID=songId) & Q(UserId=userId))
-            
-            if (not like):
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            
+
+            liked = Liked.objects.filter(
+                Q(SongID=songId) & Q(UserId=userId)).first()
+
+            if liked:
+                liked.delete()
+                return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                like.delete()
-                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-#Get request for likes by song id 
+# Get request for likes by song id
 @api_view(['GET'])
 def GetLikesBySongId(request, pk):
 
     try:
         Likes = Liked.objects.filter(SongID=pk)
-        
+
         if request.method == 'GET':
             serializer = LikeSerializer(Likes, many=True)
             return Response(serializer.data)
@@ -97,102 +103,91 @@ def GetAllLikedSongs(request):
 
 @api_view(['GET'])
 def GetAllLikedSongsByUser(request, pk):
-    try:        
+    try:
         if request.method == 'GET':
-            
-            getlikesByUser = Liked.objects.filter(UserId = pk)
+
+            getlikesByUser = Liked.objects.filter(UserId=pk)
 
             serializer = LikeSerializer(getlikesByUser, many=True)
             return Response(serializer.data)
 
     except getlikesByUser.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-  
+
 
 @api_view(['POST'])
 def Register(request):
-
     serialized = UserSerializer(data=request.data)
+
     if serialized.is_valid():
+        email = serialized.validated_data['email']
+        username = serialized.validated_data['username']
+        password = serialized.validated_data['password']
 
-        if request.method == 'POST':
-            email = serialized.validated_data['email']
-            username = serialized.validated_data['username']
-            password = serialized.validated_data['password']
+        user, created = User.objects.get_or_create(
+            email=email, defaults={'username': username, 'password': make_password(password)})
 
-            newUser = User(
-                username=username,
-                email=email,
-                password = make_password(password)
-            )
-
-            userExist = User.objects.filter(email=email)
-            if not userExist:
-                print(newUser)
-                newUser.save()
-
-                Token.objects.create(user = newUser)
-
-                login(username, password)
-                return Response(serialized.data, status=status.HTTP_201_CREATED)
-            
-            else:
-                return Response(serialized.data, status=status.HTTP_406_NOT_ACCEPTABLE)
-
+        if created:
+            Token.objects.create(user=user)
+            login(request, user)  # Assuming you have a proper login function
+            return Response({"message": "User registered successfully."}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "User with this email already exists."}, status=status.HTTP_406_NOT_ACCEPTABLE)
     else:
-        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
 def login(request, username, password):
     try:
         user = User.objects.filter(username=username)
-        # user = authenticate(username=username, password=password)
 
         if request.method == 'GET':
             if user:
                 for dataRequested in user:
                     userPassword = dataRequested.password
-                    userToken = Token.objects.get_or_create(user=dataRequested)
+                    userToken, _ = Token.objects.get_or_create(
+                        user=dataRequested)
 
                 checkPassword = check_password(password, userPassword)
 
-                if (checkPassword and userToken):
+                if checkPassword and userToken:
 
                     content = {
                         'UserId': dataRequested.id,
                         'Username': dataRequested.username,
                         'Email': dataRequested.email,
-                        'Token': str(userToken[0]),
+                        'Token': str(userToken),
                         'isUserHasToken': True
-
                     }
                     return Response(content)
                 else:
                     content = {
-                        'message' : 'Username or password is incorrect',
+                        'message': 'Username or password is incorrect',
                         'isUserHasToken': False
                     }
                     return Response(content)
             else:
                 content = {
-                    'message' : 'Username or password is incorrect',
-                    'isUserHasToken': False                
+                    'message': 'Username or password is incorrect',
+                    'isUserHasToken': False
                 }
-                return Response(content)            
-    except user.DoesNotExist:
+                return Response(content)
+    except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['GET'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def GetUserById(request, pk):
     try:
-        Users = User.objects.filter(id=pk)
+        user = User.objects.get(id=pk)
         if request.method == 'GET':
-            serializer = UserNoneSensitiveInformationSerializer(Users, many=True)
+            serializer = UserNoneSensitiveInformationSerializer(user)
             return Response(serializer.data)
 
-    except Users.DoesNotExist:
+    except User.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
@@ -201,7 +196,8 @@ def UserByUserName(request, username):
     try:
         Users = User.objects.filter(username=username)
         if request.method == 'GET':
-            serializer = UserNoneSensitiveInformationSerializer(Users, many=True)
+            serializer = UserNoneSensitiveInformationSerializer(
+                Users, many=True)
             return Response(serializer.data)
 
     except Users.DoesNotExist:
@@ -212,19 +208,19 @@ def UserByUserName(request, username):
 def ExistUsers(request):
     try:
         Users = User.objects.all()
-        
+
         if request.method == 'GET':
-            serializer = UserNoneSensitiveInformationSerializer(Users, many=True)
+            serializer = UserNoneSensitiveInformationSerializer(
+                Users, many=True)
             return Response(serializer.data)
-        
+
     except Users.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
-
 @api_view(['GET'])
 def GetPlayList(request):
-    
+
     allPlayList = PlayList.objects.all()
 
     if request.method == 'GET':
@@ -234,17 +230,20 @@ def GetPlayList(request):
 
 @api_view(['GET'])
 def GetPlayListById(request, pk):
-    
-    playListById = PlayList.objects.filter(id = pk)
+    try:
+        playlist = PlayList.objects.get(id=pk)
+    except PlayList.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = PlayListSerializer(playListById, many=True)
+        serializer = PlayListSerializer(playlist)
         return Response(serializer.data)
-    
+
 
 @api_view(['GET'])
 def GetSongsAddedToPlayListById(request, pk):
-    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId=pk)
+    AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(
+        PlayListId=pk)
 
     song_ids = AllSongsAddedToPlayList.values_list('SongID', flat=True)
 
@@ -255,7 +254,6 @@ def GetSongsAddedToPlayListById(request, pk):
         return Response(serializer.data)
 
 
-
 @api_view(['POST'])
 def CreateNewPlayList(request):
 
@@ -263,20 +261,21 @@ def CreateNewPlayList(request):
     if serialized.is_valid():
 
         if request.method == 'POST':
-            
+
             playListName = serialized.validated_data['PlayListName']
             description = serialized.validated_data['Description']
             userId = serialized.validated_data['UserId']
 
             userId = User.objects.get(id=userId.id)
-            
-            playListNameExist = PlayList.objects.filter(PlayListName = playListName)
 
-            if (userId and playListNameExist.count() == 0 ): 
+            playListNameExist = PlayList.objects.filter(
+                PlayListName=playListName)
+
+            if (userId and playListNameExist.count() == 0):
 
                 createNewPlayList = PlayList(
-                    PlayListName = playListName,
-                    Description = description,
+                    PlayListName=playListName,
+                    Description=description,
                     UserId=userId,
                 )
 
@@ -292,15 +291,16 @@ def CreateNewPlayList(request):
 def GetSongfromPlaylist(request, pk):
     try:
         # Get all songs added to the playlist
-        AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId=pk)
-        
+        AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(
+            PlayListId=pk)
+
         # Get a random song from the playlist
         random_song = AllSongsAddedToPlayList.order_by('?').first()
         # Musics = Music.objects.filter(id == random_song.SongID)
 
         # Serialize and return the random song
         if request.method == 'GET':
-            
+
             if random_song is None:
                 return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -310,17 +310,15 @@ def GetSongfromPlaylist(request, pk):
     except AllSongsAddedToPlayList.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+
 @api_view(['GET'])
 def GetCategoryById(request, pk):
     try:
         getCategory = Category.objects.filter(id=pk)
-        
+
         if request.method == 'GET':
             serializer = CategorySerializer(getCategory, many=True)
             return Response(serializer.data)
-        
+
     except getCategory.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
-    
-    
-    
