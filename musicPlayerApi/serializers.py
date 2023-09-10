@@ -34,10 +34,11 @@ class UserNoneSensitiveInformationSerializer(serializers.ModelSerializer):
         )
 
 
+
 class PlayListSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayList
-        fields ='__all__' 
+        fields = ['id', 'PlayListName', 'Description', 'PhotoCover', 'UserId', 'CreatedAt']
 
 
 class SongsAddedToPlayListSerializer(serializers.ModelSerializer):

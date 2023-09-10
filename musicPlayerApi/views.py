@@ -74,7 +74,17 @@ def LikeASongById(request):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# Get request for likes by song id
+    """
+    This function retrieves likes by song ID using a GET request.
+    
+    :param request: The request parameter is the HTTP request object that contains information about the
+    current request, such as the request method (GET, POST, etc.), headers, and query parameters
+    :param pk: The parameter `pk` in the `GetLikesBySongId` function represents the song ID. It is used
+    to filter the `Liked` objects based on the song ID and retrieve all the likes associated with that
+    song
+    :return: The code is returning a response with the serialized data of the likes that match the given
+    song id.
+    """
 @api_view(['GET'])
 def GetLikesBySongId(request, pk):
 
@@ -129,7 +139,6 @@ def Register(request):
 
         if created:
             Token.objects.create(user=user)
-            login(request, user)  # Assuming you have a proper login function
             return Response({"message": "User registered successfully."}, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": "User with this email already exists."}, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -158,8 +167,10 @@ def login(request, username, password):
                         'Username': dataRequested.username,
                         'Email': dataRequested.email,
                         'Token': str(userToken),
-                        'isUserHasToken': True
+                        'isUserHasToken': True,
+                        'successfullyLoggedIn':'Congratulations! You have successfully logged in to your account. Welcome back!'
                     }
+                    
                     return Response(content)
                 else:
                     content = {
@@ -177,9 +188,23 @@ def login(request, username, password):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+    """
+    The above code defines several API views in Python using the Django REST framework for retrieving
+    user and playlist data.
+    
+    :param request: The `request` parameter is an object that represents the HTTP request made by the
+    client. It contains information such as the request method (GET, POST, etc.), headers, query
+    parameters, and the request body. It is used to handle and process the incoming request and generate
+    a response accordingly
+    :param pk: The parameter "pk" is typically used as a shorthand for "primary key" and is commonly
+    used to refer to the unique identifier of a database record. In the context of the code you
+    provided, "pk" is used as a parameter in the functions `GetUserById` and `GetPlay
+    :return: The code is returning serialized data of users, playlists, or a specific user or playlist
+    based on the request made.
+    """
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
+# @authentication_classes([TokenAuthentication])
+# @permission_classes([IsAuthenticated])
 def GetUserById(request, pk):
     try:
         user = User.objects.get(id=pk)
@@ -218,6 +243,15 @@ def ExistUsers(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
 
+    """
+    The GetPlayList function retrieves all PlayList objects and returns them as serialized data in
+    response to a GET request.
+    
+    :param request: The `request` parameter is an object that represents the HTTP request made by the
+    client. It contains information such as the request method (GET, POST, etc.), headers, query
+    parameters, and the request body
+    :return: a response containing the serialized data of all the PlayList objects.
+    """
 @api_view(['GET'])
 def GetPlayList(request):
 
@@ -240,6 +274,19 @@ def GetPlayListById(request, pk):
         return Response(serializer.data)
 
 
+    """
+    The function retrieves all songs added to a playlist by their playlist ID and returns them as
+    serialized data.
+    
+    :param request: The `request` parameter is an object that represents the HTTP request made by the
+    client. It contains information such as the request method (GET, POST, etc.), headers, and query
+    parameters
+    :param pk: The "pk" parameter in the code represents the primary key of the playlist for which you
+    want to retrieve the songs. It is used to filter the SongsAddedToPlayList objects based on the
+    PlayListId
+    :return: The code is returning a response containing serialized data of songs from a playlist with
+    the given playlist ID.
+    """
 @api_view(['GET'])
 def GetSongsAddedToPlayListById(request, pk):
     AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(
@@ -252,16 +299,14 @@ def GetSongsAddedToPlayListById(request, pk):
     if request.method == 'GET':
         serializer = MusicSerializer(songsFromPlayList, many=True)
         return Response(serializer.data)
+    
 
 
 @api_view(['POST'])
 def CreateNewPlayList(request):
-
     serialized = PlayListSerializer(data=request.data)
     if serialized.is_valid():
-
         if request.method == 'POST':
-
             playListName = serialized.validated_data['PlayListName']
             description = serialized.validated_data['Description']
             userId = serialized.validated_data['UserId']
@@ -271,8 +316,7 @@ def CreateNewPlayList(request):
             playListNameExist = PlayList.objects.filter(
                 PlayListName=playListName)
 
-            if (userId and playListNameExist.count() == 0):
-
+            if userId and playListNameExist.count() == 0:
                 createNewPlayList = PlayList(
                     PlayListName=playListName,
                     Description=description,
@@ -281,36 +325,69 @@ def CreateNewPlayList(request):
 
                 createNewPlayList.save()
 
-                return Response(serialized.data)
+                # Serialize the newly created playlist data
+                new_playlist_data = PlayListSerializer(createNewPlayList).data
 
-    else:
-        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(new_playlist_data, status=status.HTTP_201_CREATED)
+
+    return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+ 
+    """
+    The function `GetSongfromPlaylist` retrieves all songs added to a playlist and returns them as
+    serialized data.
+    
+    :param request: The request object contains information about the current HTTP request, such as the
+    request method (GET, POST, etc.), headers, and query parameters
+    :param pk: The "pk" parameter in the GetSongfromPlaylist function represents the primary key of the
+    playlist for which you want to retrieve the songs. It is used to filter the SongsAddedToPlayList
+    objects based on the PlayListId field
+    :return: The code is returning a response containing the serialized data of all the songs added to a
+    playlist with the given playlist ID. If the playlist is not found, a 404 status code is returned.
+    """
 @api_view(['GET'])
 def GetSongfromPlaylist(request, pk):
     try:
         # Get all songs added to the playlist
-        AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(
-            PlayListId=pk)
-
-        # Get a random song from the playlist
-        random_song = AllSongsAddedToPlayList.order_by('?').first()
+        AllSongsAddedToPlayList = SongsAddedToPlayList.objects.filter(PlayListId=pk)
         # Musics = Music.objects.filter(id == random_song.SongID)
 
         # Serialize and return the random song
         if request.method == 'GET':
 
-            if random_song is None:
+            if AllSongsAddedToPlayList is None:
                 return Response(status=status.HTTP_404_NOT_FOUND)
+            
 
-            serializer = SongsAddedToPlayListSerializer(random_song)
+            serializer = SongsAddedToPlayListSerializer(AllSongsAddedToPlayList, many=True)
             return Response(serializer.data)
 
     except AllSongsAddedToPlayList.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    """
+    This function adds a song to a playlist.
+    
+    :param request: The request object contains information about the HTTP request made to the API. It
+    includes details such as the request method (e.g., POST), headers, and body
+    :return: The code is returning a response with the serialized data if it is valid and has been saved
+    successfully to the database. The status code returned is HTTP 201 Created. If the data is not
+    valid, it returns a response with the serializer errors and a status code of HTTP 400 Bad Request.
+    """
+@api_view(['POST'])
+def AddSongSongToThePlayList(request):
+    
+    if request.method == 'POST':
+            serializer = SongsAddedToPlayListSerializer(data=request.data)
+            if serializer.is_valid():
+                # Save the validated data to the database
+                data = serializer
+                data.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    
 @api_view(['GET'])
 def GetCategoryById(request, pk):
     try:
@@ -322,3 +399,4 @@ def GetCategoryById(request, pk):
 
     except getCategory.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
+
