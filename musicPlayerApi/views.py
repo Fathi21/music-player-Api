@@ -18,20 +18,12 @@ def Api(request):
 # GET request for all songs list 
 @api_view(['GET'])
 def GetAllMusic(request):
-
     try:
-        Musics = Music.objects.all()
-        if request.method == 'GET':
-            serializer = MusicSerializer(Musics, many=True)
-            return Response(serializer.data)
-
-    except Musics.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    print(Musics)
-    if request.method == 'GET':
-        serializer = MusicSerializer(Musics, many=True)
-        return Response(serializer.data)
+        musics = Music.objects.all()
+        serializer = MusicSerializer(musics, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Music.DoesNotExist:
+        return Response({"error": "No music found"}, status=status.HTTP_404_NOT_FOUND)
 
 
 # GET request by song id 
@@ -230,41 +222,121 @@ def GetSongsAddedToPlayList(request):
 
 @api_view(['POST'])
 def CreateNewPlayListAddSong(request):
+    serializer = SongsAddedToPlayListSerializer(data=request.data)
+    if serializer.is_valid():
+        song = serializer.validated_data['SongID']
+        user = serializer.validated_data['UserId']
+        playlist_id = request.data.get('PlayListId')
+        create_new = request.data.get('createNew', False)
+        custom_name = request.data.get('name')
+        custom_description = request.data.get('description', "User-created playlist")
 
-    serialized = SongsAddedToPlayListSerializer(data=request.data)
-    if serialized.is_valid():
-
-        if request.method == 'POST':
-            breakpoint()
-            song = serialized.validated_data['SongID']
-            user = serialized.validated_data['UserId']
-
-            songId = Music.objects.get(Title=song)
-            userId = User.objects.filter(username=user)
-
-            if songId and userId:
-
-                AddSongToNewPlayList = SongsAddedToPlayList(
-                    song=song,
-                    user=user,
+        if create_new:
+            # Create a new playlist with custom name and description
+            playlist = PlayList.objects.create(
+                PlayListName=custom_name or f"{user.username}'s Playlist",
+                Description=custom_description,
+                UserId=user,
+                PhotoCover=None
+            )
+        elif playlist_id:
+            try:
+                playlist = PlayList.objects.get(id=playlist_id, UserId=user)
+            except PlayList.DoesNotExist:
+                return Response({"message": "Playlist not found for this user."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            # fallback (optional default playlist)
+            playlist = PlayList.objects.filter(UserId=user).first()
+            if not playlist:
+                playlist = PlayList.objects.create(
+                    PlayListName=f"{user.username}'s Playlist",
+                    Description="Auto-generated playlist",
+                    UserId=user,
+                    PhotoCover=None
                 )
 
-                # newPlayList = PlayList(
-                #     song=song,
-                #     user=user,
-                # )
+        # Always allow adding song to playlist (even duplicates in other playlists)
+        if SongsAddedToPlayList.objects.filter(PlayListId=playlist, SongID=song).exists():
+            return Response({"message": "Song already exists in this playlist"}, status=status.HTTP_400_BAD_REQUEST)
 
-                # AddSongToNewPlayList.save()
+        SongsAddedToPlayList.objects.create(
+            PlayListId=playlist,
+            UserId=user,
+            SongID=song
+        )
 
-                print (AddSongToNewPlayList)
+        return Response({
+            "message": "Song added successfully",
+            "playlist": {
+                "id": playlist.id,
+                "name": playlist.PlayListName,
+                "description": playlist.Description
+            }
+        }, status=status.HTTP_201_CREATED)
 
-                return Response(serialized.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 
+@api_view(['POST'])
+def AddSongToExistingPlaylist(request):
+    """
+    Add a song to an existing playlist by playlist ID.
+    JSON input: {
+        "PlayListId": int,
+        "SongID": int,
+        "UserId": int
+    }
+    """
+    playlist_id = request.data.get('PlayListId')
+    song_id = request.data.get('SongID')
+    user_id = request.data.get('UserId')
 
-    else:
-        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+    if not all([playlist_id, song_id, user_id]):
+        return Response({"error": "PlayListId, SongID and UserId are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        playlist = PlayList.objects.get(id=playlist_id)
+    except PlayList.DoesNotExist:
+        return Response({"error": "Playlist not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Confirm the playlist belongs to the user
+    if playlist.UserId.id != int(user_id):
+        return Response({"error": "You do not own this playlist."}, status=status.HTTP_403_FORBIDDEN)
+
+    try:
+        song = Music.objects.get(id=song_id)
+    except Music.DoesNotExist:
+        return Response({"error": "Song not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    user = playlist.UserId
+
+    # Check if song already in playlist
+    if SongsAddedToPlayList.objects.filter(PlayListId=playlist, UserId=user, SongID=song).exists():
+        return Response({"message": "Song already exists in the playlist."}, status=status.HTTP_400_BAD_REQUEST)
+
+    # Add song to playlist
+    SongsAddedToPlayList.objects.create(
+        PlayListId=playlist,
+        UserId=user,
+        SongID=song
+    )
+
+    return Response({"message": "Song added to playlist successfully."}, status=status.HTTP_201_CREATED)
 
 
 
+# @api_view(['PUT'])
+# def UpdatePlaylist(request, playlist_id):
+#     try:
+#         playlist = PlayList.objects.get(id=playlist_id)
+#     except PlayList.DoesNotExist:
+#         return Response({"error": "Playlist not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#     # Optional: verify user ownership here if you have authentication
+
+#     serializer = PlayListSerializer(playlist, data=request.data, partial=True)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response({"message": "Playlist updated successfully.", "playlist": serializer.data})
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

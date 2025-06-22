@@ -40,6 +40,10 @@ class PlayListSerializer(serializers.ModelSerializer):
 
 
 class SongsAddedToPlayListSerializer(serializers.ModelSerializer):
+    SongID = serializers.PrimaryKeyRelatedField(queryset=Music.objects.all())
+    UserId = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
     class Meta:
         model = SongsAddedToPlayList
-        fields ='__all__' 
+        fields = ['SongID', 'UserId']
+
