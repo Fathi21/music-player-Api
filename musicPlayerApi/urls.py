@@ -16,7 +16,11 @@ urlpatterns = [
     path('Api/Register', views.Register, name='Register'),
     path('Api/login/<str:username>/<str:password>', views.login, name='login'),
     path('Api/GetPlayList', views.GetPlayList, name='GetPlayList'),
+    path('Api/GetPlayListById/<int:pk>', views.GetPlayListById, name='GetPlayListById'),
     path('Api/GetSongsAddedToPlayList', views.GetSongsAddedToPlayList, name='GetSongsAddedToPlayList'),
     path('Api/CreateNewPlayListAddSong', views.CreateNewPlayListAddSong, name='CreateNewPlayListAddSong'),
+    path ('Api/GetSongsInPlaylistById/<int:pk>', views.GetSongsInPlaylistById, name='GetSongsInPlaylistById'),
+    path('Api/RemoveSongFromPlaylist/<int:playlist_id>/<int:song_id>', views.RemoveSongFromPlaylist, name='RemoveSongFromPlaylist'),
+    path('Api/UpdatePlaylist/<int:playlistIdd>/<int:userId>', views.UpdatePlaylist, name='UpdatePlaylist'),
 
 ]
