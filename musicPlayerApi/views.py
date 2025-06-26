@@ -327,9 +327,9 @@ def RemoveSongFromPlaylist(request, playlist_id, song_id):
 
 
 @api_view(['PUT'])
-def UpdatePlaylist(request, playlistIdd, userId):
+def UpdatePlaylist(request, playlistId, userId):
     try:
-        playlist = PlayList.objects.get(id=playlistIdd)
+        playlist = PlayList.objects.get(id=playlistId)
     except PlayList.DoesNotExist:
         return Response({"error": "Playlist not found."}, status=status.HTTP_404_NOT_FOUND)
 

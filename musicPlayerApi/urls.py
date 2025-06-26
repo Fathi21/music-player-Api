@@ -21,6 +21,6 @@ urlpatterns = [
     path('Api/CreateNewPlayListAddSong', views.CreateNewPlayListAddSong, name='CreateNewPlayListAddSong'),
     path ('Api/GetSongsInPlaylistById/<int:pk>', views.GetSongsInPlaylistById, name='GetSongsInPlaylistById'),
     path('Api/RemoveSongFromPlaylist/<int:playlist_id>/<int:song_id>', views.RemoveSongFromPlaylist, name='RemoveSongFromPlaylist'),
-    path('Api/UpdatePlaylist/<int:playlistIdd>/<int:userId>', views.UpdatePlaylist, name='UpdatePlaylist'),
+    path('Api/UpdatePlaylist/<int:playlistId>/<int:userId>', views.UpdatePlaylist, name='UpdatePlaylist'),
 
 ]
