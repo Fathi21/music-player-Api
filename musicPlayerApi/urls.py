@@ -10,6 +10,7 @@ urlpatterns = [
     path('Api/GetLikesBySongId/<int:pk>', views.GetLikesBySongId, name='GetLikesBySongId'),
     path('Api/LikeASongById', views.LikeASongById, name='LikeASongById'),
     path('Api/GetAllLikedSongs', views.GetAllLikedSongs, name='GetAllLikedSongs'),
+    path('Api/GetAllLikedSongsByUser/<int:user_id>', views.GetAllLikedSongsByUser, name='GetAllLikedSongsByUser'),
     path('Api/UserById/<int:pk>', views.UserById, name='UserById'),
     path('Api/UserByUserName/<str:username>', views.UserByUserName, name='UserByUserName'),
     path('Api/ExistUsers', views.ExistUsers, name='ExistUsers'),
@@ -22,5 +23,6 @@ urlpatterns = [
     path ('Api/GetSongsInPlaylistById/<int:pk>', views.GetSongsInPlaylistById, name='GetSongsInPlaylistById'),
     path('Api/RemoveSongFromPlaylist/<int:playlist_id>/<int:song_id>', views.RemoveSongFromPlaylist, name='RemoveSongFromPlaylist'),
     path('Api/UpdatePlaylist/<int:playlistId>/<int:userId>', views.UpdatePlaylist, name='UpdatePlaylist'),
+    path('Api/DeletePlayList/<int:playlist_id>', views.DeletePlayList, name='DeletePlayList'),
 
 ]

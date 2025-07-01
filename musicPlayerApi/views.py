@@ -90,6 +90,20 @@ def GetAllLikedSongs(request):
     except likes.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['GET'])
+def GetAllLikedSongsByUser(request, user_id):
+    """
+    Retrieve all liked songs by a specific user.
+    """
+    try:
+        liked_songs = Liked.objects.filter(UserId=user_id)
+        if liked_songs.exists():
+            serializer = LikeSerializer(liked_songs, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "No liked songs found for this user."}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @api_view(['POST'])
 def Register(request):
@@ -343,3 +357,16 @@ def UpdatePlaylist(request, playlistId, userId):
         serializer.save()
         return Response({"message": "Playlist updated successfully.", "playlist": serializer.data})
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+def DeletePlayList(request, playlist_id):
+    """
+    Delete a playlist by its ID.
+    """
+    try:
+        playlist = PlayList.objects.get(id=playlist_id)
+        playlist.delete()
+        return Response({"message": "Playlist deleted successfully."}, status=status.HTTP_200_OK)
+    except PlayList.DoesNotExist:
+        return Response({"error": "Playlist not found."}, status=status.HTTP_404_NOT_FOUND)
