@@ -38,7 +38,7 @@ class Music(models.Model):
 class Liked(models.Model):
     UserId = models.ForeignKey(User, on_delete=models.CASCADE)
     SongID = models.ForeignKey(Music, on_delete=models.CASCADE)
-    CreatedAt = models.DateField(default=timezone.now)
+    CreatedAt = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return str(self.SongID) if self.SongID else ''

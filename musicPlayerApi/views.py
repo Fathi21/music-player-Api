@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import make_password
@@ -10,11 +10,17 @@ from .serializers import *
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password
+from rest_framework import generics
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate
 
 def Api(request):
 
     return JsonResponse({"Name" : "Fathi"})
-
+    
 # GET request for all songs list 
 @api_view(['GET'])
 def GetAllMusic(request):
@@ -39,6 +45,18 @@ def GetSongById(request, pk):
     except Musics.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+@api_view(['GET'])
+def GetCategoryById(request, pk):
+    """
+    Retrieve a category by its ID.
+    """
+    try:
+        category = Category.objects.get(id=pk)
+        if request.method == 'GET':
+            serializer = CategorySerializer(category)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+    except Category.DoesNotExist:
+        return Response({"error": "Category not found."}, status=status.HTTP_404_NOT_FOUND)
 
 #Post request, Like a song by id
 @api_view(['POST'])
@@ -61,7 +79,7 @@ def LikeASongById(request):
             
             else:
                 like.delete()
-                return Response(serializer.data, status=status.HTTP_204_NO_CONTENT)
+                return Response({"message": "Like removed successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
 #Get request for likes by song id 
@@ -105,78 +123,30 @@ def GetAllLikedSongsByUser(request, user_id):
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@api_view(['POST'])
-def Register(request):
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
 
-    serialized = UserSerializer(data=request.data)
-    if serialized.is_valid():
-
-        if request.method == 'POST':
-            email = serialized.validated_data['email']
-            username = serialized.validated_data['username']
-            password = serialized.validated_data['password']
-
-            newUser = User(
-                username=username,
-                email=email,
-                password = make_password(password)
-            )
-
-            userExist = User.objects.filter(email=email)
-            if not userExist:
-                print(newUser)
-                newUser.save()
-
-                token = Token.objects.create(user = newUser)
-
-                return Response(serialized.data, status=status.HTTP_201_CREATED)
-            
-            else:
-                return Response(serialized.data, status=status.HTTP_406_NOT_ACCEPTABLE)
-
-    else:
-        return Response(serialized._errors, status=status.HTTP_400_BAD_REQUEST)
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = User.objects.create_user(username=username, password=password)
+        return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
 
 
-@api_view(['GET'])
-def login(request, username, password):
-    try:
-        user = User.objects.filter(username=username)
+class LoginView(APIView):
+    permission_classes = [AllowAny]
 
-        if request.method == 'GET':
-            if user:
-                for dataRequested in user:
-                    userPassword = dataRequested.password
-                    userToken = Token.objects.get_or_create(user=dataRequested)
-
-                checkPassword = check_password(password, userPassword)
-
-                print(userToken[0])
-                if (checkPassword and userToken):
-
-                    content = {
-                        'UserId': dataRequested.id,
-                        'Username': dataRequested.username,
-                        'Email': dataRequested.email,
-                        'Token': str(userToken[0]),
-                        'isUserHasToken': True
-
-                    }
-                    return Response(content)
-                else:
-                    content = {
-                        'message' : 'Username or password is incorrect',
-                        'isUserHasToken': False
-                    }
-                    return Response(content)
-            else:
-                content = {
-                    'message' : 'Username or password is incorrect',
-                    'isUserHasToken': False                
-                }
-                return Response(content)            
-    except user.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['GET'])

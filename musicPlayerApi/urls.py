@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-
+from .views import RegisterView, LoginView
 
 urlpatterns = [
     path('', views.Api, name='Api'),
@@ -14,8 +14,8 @@ urlpatterns = [
     path('Api/UserById/<int:pk>', views.UserById, name='UserById'),
     path('Api/UserByUserName/<str:username>', views.UserByUserName, name='UserByUserName'),
     path('Api/ExistUsers', views.ExistUsers, name='ExistUsers'),
-    path('Api/Register', views.Register, name='Register'),
-    path('Api/login/<str:username>/<str:password>', views.login, name='login'),
+    path('Api/register/', RegisterView.as_view(), name='register'),
+    path('Api/login/', LoginView.as_view(), name='login'),
     path('Api/GetPlayList', views.GetPlayList, name='GetPlayList'),
     path('Api/GetPlayListById/<int:pk>', views.GetPlayListById, name='GetPlayListById'),
     path('Api/GetSongsAddedToPlayList', views.GetSongsAddedToPlayList, name='GetSongsAddedToPlayList'),
@@ -24,5 +24,5 @@ urlpatterns = [
     path('Api/RemoveSongFromPlaylist/<int:playlist_id>/<int:song_id>', views.RemoveSongFromPlaylist, name='RemoveSongFromPlaylist'),
     path('Api/UpdatePlaylist/<int:playlistId>/<int:userId>', views.UpdatePlaylist, name='UpdatePlaylist'),
     path('Api/DeletePlayList/<int:playlist_id>', views.DeletePlayList, name='DeletePlayList'),
-
+    path('Api/GetCategoryById/<int:pk>', views.GetCategoryById, name='GetCategoryById'),
 ]

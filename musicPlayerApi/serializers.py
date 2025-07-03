@@ -13,7 +13,13 @@ class MusicSerializer(serializers.ModelSerializer):
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Liked
-        fields ='__all__' 
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if 'created_at' in data and hasattr(instance, 'created_at'):
+            data['created_at'] = instance.created_at.date().isoformat() if instance.created_at else None
+        return data
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,4 +52,10 @@ class SongsAddedToPlayListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SongsAddedToPlayList
         fields = ['SongID', 'UserId']
+        
+        
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'    
